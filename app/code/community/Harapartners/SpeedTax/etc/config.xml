@@ -15,7 +15,7 @@
 <config>
     <modules>
         <Harapartners_SpeedTax>
-            <version>3.1.6</version>
+            <version>4.1.0</version>
         </Harapartners_SpeedTax>
     </modules>
     <global>
@@ -27,7 +27,16 @@
         <models>
             <speedtax>
                 <class>Harapartners_SpeedTax_Model</class>
+				<resourceModel>speedtax_resource</resourceModel>
             </speedtax>
+			<speedtax_resource>
+				<class>Harapartners_SpeedTax_Model_Resource</class>
+				<entities>
+					<failsafe_calculation_rate>
+						<table>speedtax_failsafe_calculation_rate</table>
+					</failsafe_calculation_rate>
+				</entities>
+			</speedtax_resource>
 			<tax>
                 <rewrite>
                     <sales_total_quote_tax>Harapartners_SpeedTax_Model_Rewrite_Tax_Sales_Total_Quote_Tax</sales_total_quote_tax>
@@ -50,6 +59,18 @@
             </speedtax_setup>
         </resources>
         <events>
+			<!-- Checkout process, (failsafe calculation can be enabled) -->
+			<sales_order_save_before>
+				<observers>
+                    <speedtax>
+                        <type>singleton</type>
+                        <class>speedtax/observer</class>
+                        <method>saleOrderSaveBefore</method>
+                    </speedtax>
+                </observers>
+			</sales_order_save_before>
+			
+			<!-- Post invoices to SpeedTax (failsafe delayed invoice post can be enabled) -->
             <sales_order_invoice_pay>
                 <observers>
                     <speedtax>
@@ -59,6 +80,8 @@
                     </speedtax>
                 </observers>
             </sales_order_invoice_pay>
+			
+			<!-- Post credit memo to SpeedTax (admin only function, no failsafe needed) -->
             <sales_order_creditmemo_refund>
                 <observers>
                     <speedtax>
@@ -68,7 +91,9 @@
                     </speedtax>
                 </observers>
             </sales_order_creditmemo_refund>
-			<order_cancel_after>
+			
+			<!-- Upon order cancel/edit, credit memo must be created manually for existing invoices, SpeedTax invoices will NOT be voided -->
+			<!--order_cancel_after>
 				<observers>
                     <speedtax>
                         <type>singleton</type>
@@ -76,30 +101,24 @@
                         <method>orderCancelAfter</method>
                     </speedtax>
                 </observers>
-			</order_cancel_after>
+			</order_cancel_after-->
         </events>
     </global>
     <adminhtml>
-        <acl>
-            <resources>
-                <admin>
-                    <children>
-                        <system>
-                            <children>
-                                <config>
-                                    <children>
-                                        <speedtax translate="title" module="speedtax">
-                                            <title>SpeedTax Configuration</title>
-                                        </speedtax>
-                                    </children>
-                                </config>
-                            </children>
-                        </system>
-                    </children>
-                </admin>
-            </resources>
-        </acl>
-    </adminhtml>
+		<events>
+			<controller_action_layout_generate_blocks_after>
+				<!-- Global layout modifications -->
+				<!-- Prepare and render important admin panel messages -->
+                <observers>
+                    <speedtax_adminhtml_only_layout_generate_blocks_after>
+                        <type>singleton</type>
+                        <class>speedtax/observer</class>
+                        <method>adminhtmlOnlyLayoutGenerateBlocksAfter</method>
+                    </speedtax_adminhtml_only_layout_generate_blocks_after>
+                </observers>
+			</controller_action_layout_generate_blocks_after>
+		</events>
+	</adminhtml>
     <admin>
         <routers>
             <speedtax_adminhtml>
@@ -111,6 +130,18 @@
             </speedtax_adminhtml>
         </routers>
     </admin>
+	<crontab>
+		<jobs>
+			<speedtax_batch_post_failsafe_invoice>
+				<schedule>
+					<cron_expr>23 * * * *</cron_expr>
+				</schedule>
+				<run>
+					<model>speedtax/observer::batchPostFailsafeInvoice</model>
+				</run>
+			</speedtax_batch_post_failsafe_invoice>
+		</jobs>
+	</crontab>
     <default>
         <speedtax>
             <speedtax>
@@ -125,8 +156,12 @@
                 <error_frontend_message>Unfortunately, we could not calculate tax for your order. Please try again with a different address or contact us to complete your order.</error_frontend_message>
                 <error_backend_message>There was an error getting tax rates from Speedtax. Please see the error log for details.</error_backend_message>
                 <error_notification_toolbar>1</error_notification_toolbar>
-                <onepage_normalize_message>Your shipping address has been modified during our validation process.  Please confirm the address to the right is accurate.</onepage_normalize_message>
+                <onepage_normalize_message>Your shipping address has been modified during our validation process. Please confirm the address to the right is accurate.</onepage_normalize_message>
             </speedtax>
+			<failsafe>
+				<is_enabled>1</is_enabled>
+				<is_auto_post_failsafe_invoice>1</is_auto_post_failsafe_invoice>
+			</failsafe>
         </speedtax>
     </default>
 </config>

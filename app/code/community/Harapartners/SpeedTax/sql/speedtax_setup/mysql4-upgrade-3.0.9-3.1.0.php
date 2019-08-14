@@ -13,114 +13,38 @@
 $installer = $this;
 $installer->startSetup();
 
-$speedTaxTransactionIdColumnName = 'speedtax_transaction_id';
-$speedtaxInvoiceNumberColumnName = 'speedtax_invoice_number';
-$speedtaxInvoiceStatusColumnName = 'speedtax_invoice_status';
-$connectionConfig = $installer->getConnection()->getConfig();
-
 // ================ Invoice ================ //
-$testQuery = "
-SELECT * FROM information_schema.COLUMNS
-	WHERE column_name='$speedtaxInvoiceNumberColumnName'
-		AND table_name='{$this->getTable('sales/invoice')}'
-		AND table_schema='{$connectionConfig['dbname']}'
-";
-if(!!$installer->getConnection()->fetchAll($testQuery)){
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/invoice')}` 
-	DROP COLUMN `$speedtaxInvoiceNumberColumnName`;
-    ");
-}
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/invoice')}` 
-	ADD COLUMN `$speedtaxInvoiceNumberColumnName` varchar(255);
-    ");
-	
-$testQuery = "
-SELECT * FROM information_schema.COLUMNS
-	WHERE column_name='$speedtaxInvoiceStatusColumnName'
-		AND table_name='{$this->getTable('sales/invoice')}'
-		AND table_schema='{$connectionConfig['dbname']}'
-";
-if(!!$installer->getConnection()->fetchAll($testQuery)){
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/invoice')}` 
-	DROP COLUMN `$speedtaxInvoiceStatusColumnName`;
-    ");
-}
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/invoice')}` 
-	ADD COLUMN `$speedtaxInvoiceStatusColumnName` SMALLINT(5) DEFAULT 0;
-    ");
-	
-$testQuery = "
-SELECT * FROM information_schema.COLUMNS
-	WHERE column_name='$speedTaxTransactionIdColumnName'
-		AND table_name='{$this->getTable('sales/invoice')}'
-		AND table_schema='{$connectionConfig['dbname']}'
-";
-if(!!$installer->getConnection()->fetchAll($testQuery)){
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/invoice')}` 
-	DROP COLUMN `$speedTaxTransactionIdColumnName`;
-    ");
-}
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/invoice')}` 
-	ADD COLUMN `$speedTaxTransactionIdColumnName` varchar(255);
-    ");
+$installer->getConnection()->addColumn(
+	$installer->getTable('sales/invoice'),
+    "speedtax_invoice_number",
+	"VARCHAR(255) COMMENT 'SpeedTax Invoice Number'"
+);	
+$installer->getConnection()->addColumn(
+	$installer->getTable('sales/invoice'),
+    "speedtax_invoice_status",
+	"SMALLINT(5) DEFAULT '0' COMMENT 'SpeedTax Invoice Status'"
+);
+$installer->getConnection()->addColumn(
+	$installer->getTable('sales/invoice'),
+    "speedtax_transaction_id",
+	"VARCHAR(255) COMMENT 'SpeedTax Transaction ID'"
+);
 
-	
 // ================ Credit Memo ================ //
-$testQuery = "
-SELECT * FROM information_schema.COLUMNS
-	WHERE column_name='$speedtaxInvoiceNumberColumnName'
-		AND table_name='{$this->getTable('sales/creditmemo')}'
-		AND table_schema='{$connectionConfig['dbname']}'
-";
-if(!!$installer->getConnection()->fetchAll($testQuery)){
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/creditmemo')}` 
-	DROP COLUMN `$speedtaxInvoiceNumberColumnName`;
-    ");
-}
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/creditmemo')}` 
-	ADD COLUMN `$speedtaxInvoiceNumberColumnName` varchar(255);
-    ");
-	
-$testQuery = "
-SELECT * FROM information_schema.COLUMNS
-	WHERE column_name='$speedtaxInvoiceStatusColumnName'
-		AND table_name='{$this->getTable('sales/creditmemo')}'
-		AND table_schema='{$connectionConfig['dbname']}'
-";
-if(!!$installer->getConnection()->fetchAll($testQuery)){
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/creditmemo')}` 
-	DROP COLUMN `$speedtaxInvoiceStatusColumnName`;
-    ");
-}
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/creditmemo')}` 
-	ADD COLUMN `$speedtaxInvoiceStatusColumnName` SMALLINT(5) DEFAULT 0;
-    ");
-
-$testQuery = "
-SELECT * FROM information_schema.COLUMNS
-	WHERE column_name='$speedTaxTransactionIdColumnName'
-		AND table_name='{$this->getTable('sales/creditmemo')}'
-		AND table_schema='{$connectionConfig['dbname']}'
-";
-if(!!$installer->getConnection()->fetchAll($testQuery)){
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/creditmemo')}` 
-	DROP COLUMN `$speedTaxTransactionIdColumnName`;
-    ");
-}
-$installer->run("
-ALTER TABLE `{$this->getTable('sales/creditmemo')}` 
-	ADD COLUMN `$speedTaxTransactionIdColumnName` varchar(255);
-    ");
+$installer->getConnection()->addColumn(
+	$installer->getTable('sales/creditmemo'),
+    "speedtax_invoice_number",
+	"VARCHAR(255) COMMENT 'SpeedTax Invoice Number'"
+);	
+$installer->getConnection()->addColumn(
+	$installer->getTable('sales/creditmemo'),
+    "speedtax_invoice_status",
+	"SMALLINT(5) DEFAULT '0' COMMENT 'SpeedTax Invoice Status'"
+);
+$installer->getConnection()->addColumn(
+	$installer->getTable('sales/creditmemo'),
+    "speedtax_transaction_id",
+	"VARCHAR(255) COMMENT 'SpeedTax Transaction ID'"
+);
 
 $installer->endSetup();

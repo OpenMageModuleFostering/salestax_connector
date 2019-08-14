@@ -18,6 +18,7 @@ class Harapartners_SpeedTax_Helper_Processor extends Mage_Core_Helper_Abstract {
 	const SPEEDTAX_INVOICE_STATUS_POSTED 			= 100;
 	const SPEEDTAX_INVOICE_STATUS_VOID 				= 200;
 	const SPEEDTAX_INVOICE_STATUS_ERROR 			= 300;
+	const SPEEDTAX_INVOICE_STATUS_FAILSAFE			= 900;
 	
     // ========================== Actions ========================== //
  	public function queryQuoteAddress(Mage_Sales_Model_Quote_Address $mageQuoteAddress){
@@ -87,7 +88,7 @@ class Harapartners_SpeedTax_Helper_Processor extends Mage_Core_Helper_Abstract {
             return false;
         }
 		//No caching allowed for order invoice
-        $responseResult = Mage::helper('speedtax/connector_speedtax')->cancelAllOrderTransactions($invoiceNumbers);
+        $responseResult = Mage::helper('speedtax/connector_speedtax')->batchVoidInvoices($invoiceNumbers);
         
         //Update status
         $batchVoidResults = json_decode($responseResult->data->result->batchVoidResults, 1);
@@ -129,8 +130,8 @@ class Harapartners_SpeedTax_Helper_Processor extends Mage_Core_Helper_Abstract {
                 $mageQuoteItem->setTaxPercent (sprintf("%.4f", 100*$taxAmount/($mageQuoteItem->getRowTotal() - $mageQuoteItem->getDiscountAmount())));
             }
         }
-        if(!!$this->_getTaxShippingAmount($responseResult)){
-            $taxShippingAmount = $this->_getTaxShippingAmount($responseResult);
+        $taxShippingAmount = $this->_getTaxShippingAmount($responseResult);
+        if(!!$taxShippingAmount){
             $mageQuoteAddress->setShippingTaxAmount($taxShippingAmount);
             $mageQuoteAddress->setBaseShippingTaxAmount($taxShippingAmount);
         }
@@ -166,12 +167,14 @@ class Harapartners_SpeedTax_Helper_Processor extends Mage_Core_Helper_Abstract {
        	return 0.0;
     }
     
-	protected function _getTaxShippingAmount() {
-		foreach($responseResult->lineItemBundles->lineItems as $responseLineItem){
-       		if($responseLineItem->productCode == self::TAX_SHIPPING_LINEITEM_TAX_CLASS){
-       			return $responseLineItem->taxAmount->decimalValue;
-       		}
-       	}
+	protected function _getTaxShippingAmount($responseResult) {
+		if(isset($responseResult->lineItemBundles->lineItems)){
+			foreach($responseResult->lineItemBundles->lineItems as $responseLineItem){
+	       		if($responseLineItem->productCode == Harapartners_SpeedTax_Helper_Connector_Data::TAX_SHIPPING_LINEITEM_TAX_CLASS){
+	       			return $responseLineItem->taxAmount->decimalValue;
+	       		}
+	       	}
+		}
        	return 0.0;
     }
     

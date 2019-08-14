@@ -1,21 +1,20 @@
 <?php
-/*
+/**
  * NOTICE OF LICENSE
  *
  * This source file is subject to the End User Software Agreement (EULA).
  * It is also available through the world-wide-web at this URL:
- * http://www.harapartners.com/license [^]
+ * http://www.harapartners.com/license
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to eula@harapartners.com so we can send you a copy immediately.
- *
+ * 
  */
-class Harapartners_ConnectorHub_Helper_Connector_Config
-{
 
-    public function getConnectorHubRootUrl()
-    {
-        return "https://api.connectorsuite.com/";
+class Harapartners_SpeedTax_Model_Resource_Failsafe_Calculation_Rate_Collection extends Mage_Core_Model_Mysql4_Collection_Abstract{
+    
+	public function _construct(){
+        $this->_init('speedtax/failsafe_calculation_rate');
     }
     
 }

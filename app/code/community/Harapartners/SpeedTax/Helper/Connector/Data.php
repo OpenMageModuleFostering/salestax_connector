@@ -12,10 +12,10 @@
  */
 class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstract {
 	
-	const TAX_SHIPPING_LINEITEM_TAX_CLASS = 'TAX_SHIPPING';
-    const TAX_SHIPPING_LINEITEM_REFERNCE_NAME = 'TAX_SHIPPING';
+	const TAX_SHIPPING_LINEITEM_TAX_CLASS 		= 'TAX_SHIPPING';
+    const TAX_SHIPPING_LINEITEM_REFERNCE_NAME 	= 'TAX_SHIPPING';
     
-    protected $_productTaxClassNoneTaxableId = 0; //Magento default
+    protected $_productTaxClassNoneTaxableId 	= 0; //Magento default
 //    protected $_allowedCountryIds = array('US', 'CA');
     
 	protected $_shipFromAddress = null;
@@ -36,7 +36,13 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
             if($mageQuoteItem->getProduct()->getTaxClassId() == $this->_productTaxClassNoneTaxableId){
                 continue;
             }
-            if($mageQuoteItem->getRowTotal() - $mageQuoteItem->getDiscountAmount() <= 0){
+            
+            //Respect Magento tax/discount config
+        	$taxableAmount = $mageQuoteItem->getRowTotal();
+        	if(!!Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_APPLY_AFTER_DISCOUNT, $mageQuoteItem->getStoreId())){
+        		$taxableAmount = $taxableAmount - $mageQuoteItem->getDiscountAmount() + $mageQuoteItem->getHiddenTaxAmount();
+        	}
+            if($taxableAmount <= 0){
                 continue;
             }
             
@@ -49,7 +55,7 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
             
             //Price of row total, not unit price
             $lineItemPrice = new stdClass();
-            $lineItemPrice->decimalValue = $mageQuoteItem->getRowTotal() - $mageQuoteItem->getDiscountAmount();
+            $lineItemPrice->decimalValue = $taxableAmount;
             $lineItem->salesAmount = $lineItemPrice;
             
             $lineItem->lineItemNumber = count( $sptxInvoice->lineItems );
@@ -73,7 +79,7 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
         //Clear the invoice number so that the request is just a query
         $mageOrderAddress = $mageOrderInvoice->getShippingAddress();
         $sptxInvoice = new stdClass();
-        
+        $sptxInvoice->lineItems = array();
         //Important to keep unique, invoice should already be attached to the order, count starts from 1
         $sptxInvoice->invoiceNumber = 
         		$mageOrderInvoice->getOrder()->getIncrementId() 
@@ -84,6 +90,13 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
             if(!$mageItem->getTaxAmount() || $mageItem->getTaxAmount() <= 0.0){
                 continue;
             }
+            
+        	//Respect Magento tax/discount config
+        	$taxableAmount = $mageItem->getRowTotal();
+        	if(!!Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_APPLY_AFTER_DISCOUNT, $mageItem->getStoreId())){
+        		$taxableAmount = $taxableAmount - $mageItem->getDiscountAmount() + $mageItem->getHiddenTaxAmount();
+        	}
+            
             $lineItem = new stdClass();
             $lineItem->productCode = $this->_getProductCode($mageItem);
             $lineItem->customReference = $mageItem->getOrderItemId(); //This is during invoice creation, no ID available
@@ -93,7 +106,7 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
             
             //Price of row total, not unit price
             $lineItemPrice = new stdClass();
-            $lineItemPrice->decimalValue = $mageItem->getRowTotal() - $mageItem->getDiscountAmount();
+            $lineItemPrice->decimalValue = $taxableAmount;
             $lineItem->salesAmount = $lineItemPrice;
             
             $lineItem->lineItemNumber = count( $sptxInvoice->lineItems );
@@ -120,6 +133,8 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
         //Clear the invoice number so that the request is just a query
         $mageOrderAddress = $mageOrderCreditmemo->getShippingAddress();
         $sptxInvoice = new stdClass();
+        $sptxInvoice->lineItems = array();
+        
         //Important to keep unique, credit memo not yet attached to the order, count ++ so that it starts from 1
         $sptxInvoice->invoiceNumber = 
         		$mageOrderCreditmemo->getOrder()->getIncrementId() 
@@ -130,6 +145,13 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
             if(!$mageItem->getTaxAmount() || $mageItem->getTaxAmount() <= 0.0){
                 continue;
             }
+            
+        	//Respect Magento tax/discount config
+        	$taxableAmount = $mageItem->getRowTotal();
+        	if(!!Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_APPLY_AFTER_DISCOUNT, $mageItem->getStoreId())){
+        		$taxableAmount = $taxableAmount - $mageItem->getDiscountAmount() + $mageItem->getHiddenTaxAmount();
+        	}
+            
             $lineItem = new stdClass();
             $lineItem->productCode = $this->_getProductCode($mageItem);
             $lineItem->customReference = $mageItem->getOrderItemId(); //This is during credit memo creation, no ID available
@@ -139,7 +161,7 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
             
             //Price of row total, not unit price
             $lineItemPrice = new stdClass();
-            $lineItemPrice->decimalValue = $mageItem->getRowTotal() - $mageItem->getDiscountAmount();
+            $lineItemPrice->decimalValue = $taxableAmount;
             $lineItem->salesAmount = $lineItemPrice;
             
             $lineItem->lineItemNumber = count( $sptxInvoice->lineItems );
@@ -206,7 +228,7 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
 			$street = implode(' ', $address->getStreet()); //In case of multiple line address
 	            
 			$this->_shipToAddress->address1 = $street;
-			$this->_shipToAddress->address2 = $city . ", " . $state . " " . $zip; //. ", " . $country;
+			$this->_shipToAddress->address2 = $city . ", " . $state . " " . $zip; //. ", " . $county;
     	}
         return $this->_shipToAddress;
     }

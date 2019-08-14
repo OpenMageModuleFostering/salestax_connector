@@ -19,20 +19,14 @@ class Harapartners_ConnectorHub_Model_Rewrite_Paypal_Config extends Mage_Paypal_
 	public function __get($key){
 		if(strcmp($key, 'verifyPeer') == 0 || strcmp($key, 'verify_peer') == 0){
 			if($this->_isStagingMode === null){
-				$this->_isStagingMode = 0;
-				try{
-					$curlResource = curl_init("https://www.paypal.com/");
-					curl_setopt($curlResource, CURLOPT_TIMEOUT, 3);
-					curl_setopt($curlResource, CURLOPT_RETURNTRANSFER, false);
-					curl_setopt($curlResource, CURLOPT_SSL_VERIFYPEER, true);
-					curl_exec($curlResource);
-					$curlError = curl_error($curlResource);
-					curl_close($curlResource);
-					if(!!$curlError){
+				$this->_isStagingMode = 1;
+				if(!empty($_SERVER['HTTP_REFERER'])){
+					$refererUrlInfo = parse_url($_SERVER['HTTP_REFERER']);
+					if(!empty($refererUrlInfo['scheme']) && $refererUrlInfo['scheme'] == 'https'){
+						$this->_isStagingMode = 0;
+					}else{
 						$this->_isStagingMode = 1;
 					}
-				}catch (Exception $ex){
-					$this->_isStagingMode = 1;
 				}
 			}
 			if($this->_isStagingMode == 1){
@@ -49,6 +43,7 @@ class Harapartners_ConnectorHub_Model_Rewrite_Paypal_Config extends Mage_Paypal_
 			return 'Hara_SI_MagentoCE_PPA';
 		}
 	}
+	
 	private function _isModuleActive($code) {
         $module = Mage::getConfig()->getNode("modules/$code");
         $model = Mage::getConfig()->getNode("global/models/$code");

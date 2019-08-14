@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!--
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the End User Software Agreement (EULA).
+ * It is also available through the world-wide-web at this URL:
+ * http://www.harapartners.com/license
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to eula@harapartners.com so we can send you a copy immediately.
+ *
+ * 
+ -->
+<config>
+	<acl>
+        <resources>
+            <admin>
+                <children>
+					<speedtax translate="title" module="speedtax">
+						<title>SalesTax</title>
+						<children>
+							<invoice>
+								<title>Manage Invoices</title>
+							</invoice>
+						</children>
+					</speedtax>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <speedtax translate="title" module="speedtax">
+                                        <title>SpeedTax Configuration</title>
+                                    </speedtax>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+	<menu>
+		<speedtax translate="title" module="speedtax">
+			<title>SalesTax</title>
+			<sort_order>900</sort_order>
+			<children>
+				<!-- Core -->
+				<config translate="title" module="speedtax">
+					<title>SalesTax Config</title>
+					<sort_order>10</sort_order>
+					<action>adminhtml/system_config/edit/section/speedtax</action>
+				</config>
+				<invoice_index translate="title" module="speedtax">
+					<title>All Invoices</title>
+					<sort_order>100</sort_order>
+					<action>speedtax_adminhtml/invoice/index</action>
+				</invoice_index>
+				<invoice_failsafe_index translate="title" module="speedtax">
+					<title>Failsafe Invoices</title>
+					<sort_order>200</sort_order>
+					<action>speedtax_adminhtml/invoice/failsafeIndex</action>
+				</invoice_failsafe_index>
+				<invoice_ratevalidation_index translate="title" module="speedtax">
+					<title>Failsafe Rate Verification</title>
+					<sort_order>300</sort_order>
+					<action>speedtax_adminhtml/invoice/rateVerificationIndex</action>
+				</invoice_ratevalidation_index>
+            </children>
+		</speedtax>
+	</menu>
+</config>

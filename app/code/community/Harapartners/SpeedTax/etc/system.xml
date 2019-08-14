@@ -22,7 +22,7 @@
             <sort_order>304</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
-            <show_in_store>1</show_in_store>
+            <show_in_store>0</show_in_store>
             <groups>
 				<signup>
                     <label>Sign up for SalesTax.com</label>
@@ -36,15 +36,15 @@
                     <sort_order>0</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
+                    <show_in_store>0</show_in_store>
 					<expanded>1</expanded>
 				</signup>
                 <speedtax>
                     <label>SalesTax.com Configuration</label>
-                    <sort_order>0</sort_order>
+                    <sort_order>100</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
+                    <show_in_store>0</show_in_store>
                     <fields>
 						<is_enabled translate="label">
 							<label>Status</label>
@@ -54,7 +54,7 @@
 							<sort_order>100</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
+							<show_in_store>0</show_in_store>
 						</is_enabled>
                         <username translate="label">
                             <label>Username</label>
@@ -63,7 +63,7 @@
                             <sort_order>110</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
 							<validate>required-entry</validate>
                         </username>
                         <password translate="label">
@@ -74,7 +74,7 @@
                             <sort_order>115</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
 							<validate>required-entry</validate>
                         </password>
                         <company_code translate="label">
@@ -84,7 +84,7 @@
                             <sort_order>120</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
 							<validate>required-entry</validate>
                         </company_code>
                         <is_test_mode translate="label">
@@ -95,11 +95,11 @@
                             <sort_order>125</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </is_test_mode>
 						<authentication_wizard translate="button_label">
                             <label></label>
-							<comment><![CDATA[You <b style="color: red;">must</b> validate your login credentials first and then <b style="color: red;">save</b> the configuration.]]></comment>
+							<comment><![CDATA[Please <b style="color: red;">save</b> the configuration after validating your login credentials.]]></comment>
                             <button_label>Validate login credentials</button_label>
                             <frontend_model>speedtax/adminhtml_system_config_form_field_authentication</frontend_model>
                             <sort_order>150</sort_order>
@@ -115,7 +115,7 @@
                             <sort_order>311</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </tax_shipping>
                         <origins translate="label">
                             <label>Nexus</label>
@@ -128,8 +128,59 @@
                             <show_in_store>0</show_in_store>
                             <validate>required-entry</validate>
                         </origins>
+						<is_debug_transaction translate="label">
+                            <label>Debug transactions</label>
+                            <comment><![CDATA[If "Yes", transactions will be logged.]]></comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>900</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </is_debug_transaction>
                     </fields>
                 </speedtax>
+				<failsafe>
+					<label>Fail Safe Configuration</label>
+                    <comment><![CDATA[
+                        <p class="switcher">
+						Fail safe logic provides an additional layer of robustness to the tax integration.<br/>
+						This mechanism allows the customer to complete checkout in case the SalesTax service is unreachable.<br/>
+						Magento processes supported for fail safe: checkout, place order and invoice pay.<br/>
+						1) During tax calculation, state level tax rates for default taxable goods are stored in Magento in case of a future failure.<br/>
+						2) If the invoice cannot be posted to SalesTax, the invoice processing workflow can continue. The problematic invoices can be posted to SalesTax later.
+						</p>
+                    ]]></comment>
+					<sort_order>200</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+					<fields>
+						<is_enabled translate="label">
+							<label>Is Enabled</label>
+							<comment><![CDATA[]]></comment>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>100</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</is_enabled>
+						<is_auto_post_failsafe_invoice translate="label">
+							<label>Auto Post Fail Safe Invoice</label>
+							<comment><![CDATA[
+									If "Yes", fail safe invoice can be posted to SalesTax automatically.<br/>
+									Please make sure Magento cron job is running.
+							]]></comment>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>200</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</is_auto_post_failsafe_invoice>
+					</fields>
+				</failsafe>
 				<help_extra>
 					<label>SalesTax.com Help</label>
                     <comment><![CDATA[
@@ -139,10 +190,10 @@
                         Learn more about the SalesTax.com solution, additional features, updates and help at <a href="http://www.harapartners.com/salestax" target="_blank" style="color: #00C3FF;">http://www.harapartners.com/salestax</a>.
 						</p>
                     ]]></comment>
-                    <sort_order>100</sort_order>
+                    <sort_order>300</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
+                    <show_in_store>0</show_in_store>
 					<expanded>1</expanded>
 				</help_extra>
             </groups>
@@ -157,7 +208,7 @@
                             <sort_order>99</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </street>
                     </fields>
                 </origin>

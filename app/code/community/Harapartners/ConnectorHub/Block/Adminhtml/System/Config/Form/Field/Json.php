@@ -15,31 +15,18 @@ class Harapartners_ConnectorHub_Block_Adminhtml_System_Config_Form_Field_Json ex
 	
     protected function _toHtml() {
     	$element = $this->getData('element');
-    	$elementData = (string)$element->getValue();
-    	$jsonValidateData = json_decode(trim($element->getValue()), true);
-        if(!$jsonValidateData){
-        	if($elementJsonConfig['structure'] == 'list'){
-        		$elementData = "[]";
-        	}else{
-        		$elementData = "{}";
-        	}
-        }
-    	
-    	$hiddenInput = '<input type="hidden" id="'.$element->getHtmlId().'" name="'.$element->getName()
-             .'" value="'.$element->getEscapedValue().'" '.$this->serialize($element->getHtmlAttributes()).'/>'."\n";
-    	
-        $elementFieldConfig = $element->getFieldConfig();
+    	$elementFieldConfig = $element->getFieldConfig();
         $elementJsonConfig = array(
         		'structure'		=> (string)$elementFieldConfig->frontend_json_structure,
         		'key_label'		=> (string)$elementFieldConfig->frontend_json_key_label,
         		'value_label'	=> (string)$elementFieldConfig->frontend_json_value_label,
         );
-        $elementJsonConfig = json_encode($elementJsonConfig);
-        
-        
     	
+    	$elementData = $this->_prepareElementData($element, $elementJsonConfig);
+    	$elementJsonConfig = json_encode($elementJsonConfig);
+
 		$htmlContent = <<< HTML_CONTENT
-$hiddenInput
+<input type="hidden" id="{$element->getHtmlId()}" name="{$element->getName()}" value="{$element->getEscapedValue()}" {$this->serialize($element->getHtmlAttributes())}/>
 <div id="{$element->getHtmlId()}_json_config_widget" class="json_config_widget_container"></div>
 <script type="text/javascript">
 	var {$element->getHtmlId()} = new JsonConfigWidget();
@@ -47,6 +34,28 @@ $hiddenInput
 </script>
 HTML_CONTENT;
     	return $htmlContent;
+    }
+    
+    protected function _prepareElementData($element){
+    	$elementFieldConfig = $element->getFieldConfig();
+    	$elementJsonConfig = array(
+        		'structure'		=> (string)$elementFieldConfig->frontend_json_structure,
+        		'key_label'		=> (string)$elementFieldConfig->frontend_json_key_label,
+        		'value_label'	=> (string)$elementFieldConfig->frontend_json_value_label,
+        );
+    	$elementData = (string)$element->getValue();
+    	
+    	//Try to decode to validate the data, if not validate, use empty placeholders
+    	$jsonValidateData = json_decode(trim($element->getValue()), true);
+        if(!$jsonValidateData){
+        	if(isset($elementJsonConfig['structure']) && $elementJsonConfig['structure'] == 'list'){
+        		$elementData = "[]";
+        	}else{
+        		$elementData = "{}";
+        	}
+        }
+        
+        return $elementData;
     }
 
     protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element){

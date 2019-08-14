@@ -41,13 +41,27 @@ class Harapartners_SpeedTax_Model_Rewrite_Tax_Sales_Total_Quote_Tax extends Mage
 				$taxAmount = $processor->getTotalTax($responseResult);
 				$this->_addAmount(Mage::app()->getStore()->convertPrice($taxAmount, false));
 				$this->_addBaseAmount($taxAmount);
+				if (Mage::helper('speedtax')->isFailsafeEnabled()) {
+					//Failsafe logic: accumuate rates in preparation of future failure
+					Mage::helper('speedtax/failsafe')->updateFailsafeRate($address, $responseResult);
+				}
 			}
 		} catch(Exception $e) {
 			//Tax collecting is very important, this is within the collect total (cannot bubble exceptions), force a redirect
-			Mage::logException($e);
-			$maskedErrorMessage = 'There is an error calculating tax.';
-			Mage::getSingleton('core/session')->addError($maskedErrorMessage);
-			throw new Mage_Core_Model_Session_Exception($maskedErrorMessage); //Session exceptions will be redirected to base URL
+			//Mage::logException($e);
+			Mage::log("Cannot collect quote tax total: {$e->getMessage()}\r\n{$e->getTraceAsString()}", null, Harapartners_SpeedTax_Helper_Data::ERROR_LOG_FILE, true);
+			if (Mage::helper('speedtax')->isFailsafeEnabled()) {
+				//Failsafe logic: mark "calculate by failsafe rates" in case the order is placed
+				Mage::unregister('is_speedtax_failsafe_calculation');
+				Mage::register('is_speedtax_failsafe_calculation', true);
+				//Failsafe logic: calculate by failsafe rates
+				$taxFailsafe = Mage::getModel('speedtax/failsafe_sales_total_quote_tax');
+				return $taxFailsafe->collect($address);
+			}else{
+				$maskedErrorMessage = 'There is an error calculating tax.';
+				Mage::getSingleton('core/session')->addError($maskedErrorMessage);
+				throw new Mage_Core_Model_Session_Exception($maskedErrorMessage); //Session exceptions will be redirected to base URL
+			}
 		}
 		
 		return $this;

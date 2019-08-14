@@ -55,7 +55,7 @@ class Harapartners_SpeedTax_Adminhtml_System_Config_AjaxController extends Mage_
 		//Need to send $websiteResultJson, the store config is still the cache value, not our new value 
 		echo json_encode(array(
 				'status' => 1,
-				'message' => 'Successful! Please save your configuration'
+				'message' => 'Validation successful!'
 		)); //Json success
 		exit;
     }

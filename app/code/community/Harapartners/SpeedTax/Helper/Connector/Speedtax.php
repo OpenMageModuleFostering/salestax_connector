@@ -25,12 +25,23 @@ class Harapartners_SpeedTax_Helper_Connector_Speedtax extends Harapartners_Conne
 	protected $_serviceType							= 'speedtax';
 	
 	// ======================= Essential overrides ======================= //
-    public function getServiceMode(){
+    public function getServiceMode($request = null){
+    	//Always default to production for safety
     	$serviceMode = Harapartners_ConnectorHub_Helper_Connector_Core::REQUEST_SERVICE_MODE_PRODUCTION;
+    	
+    	//Check from request first (in case it's a new authorization), default to last saved config value
     	if(!!Mage::getStoreConfig($this->_getConfigDataBasePath('is_test_mode'))){
     		$serviceMode = Harapartners_ConnectorHub_Helper_Connector_Core::REQUEST_SERVICE_MODE_TEST;
     	}
+    	if(isset($request['meta']['credentials']['service_mode'])){
+			$serviceMode = $request['meta']['credentials']['service_mode']; //Allow 0 and other empty values
+		}
+    	
     	return $serviceMode;
+    }
+    
+    public function getIsDebugMode(){
+    	return Mage::getStoreConfig($this->_getConfigDataBasePath('is_debug_transaction'));
     }
     
 	protected function _getConnectorHubUrl(){
@@ -77,35 +88,19 @@ class Harapartners_SpeedTax_Helper_Connector_Speedtax extends Harapartners_Conne
 		return $response->data->result;
 	}
 	
-	public function cancelAllOrderTransactions($invoiceNumbers){
+	public function batchVoidInvoices($invoiceNumbers){
 		$credentials = $this->_prepareCredentials();
 		$request = array(
     			'meta' => array(
-    					'action' => $actionType
+    					'action' => self::REQUEST_ACTION_BATCH_VOID_INVOICES
     			),
     			'data' => array(
     					'credentials' => $credentials,
-    					'invoice' => $sptxInvoice
+    					'invoice_numbers' => $invoiceNumbers
     			)
     	);
-    	
 		$response = $this->_processRequest($request);
-	
-		//Essential validation!
-		if(!$response->data || !$response->data->result){
-    		Mage::throwException('Invalid tax response');
-    	}
-    	$responseResult = $response->data->result;
-        switch ($responseResult->resultType) {
-            case self::RESPONSE_TYPE_SUCCESS:
-                break;
-            case self::RESPONSE_TYPE_FAILED_WITH_ERRORS:
-            case self::RESPONSE_TYPE_FAILED_INVOICE_NUMBER:
-            default :
-            	Mage::throwException('Tax request failed');
-                break;
-        }
-		
+		$this->_validateResponse($response);
 		return $response;
 	}
 	
@@ -124,24 +119,12 @@ class Harapartners_SpeedTax_Helper_Connector_Speedtax extends Harapartners_Conne
     	$response = $this->_loadCachedInvoiceResponse($sptxInvoice, $actionType);
     	if(!$response){
 			$response = $this->_processRequest($request);
-			$this->_saveCachedInvoiceResponse($response, $sptxInvoice, $actionType);
+			//Save cache upon successful transactions only
+			if(isset($response->meta->status) && $response->meta->status == Harapartners_ConnectorHub_Helper_Connector_Core::RESPONSE_STATUS_SUCCESS){
+				$this->_saveCachedInvoiceResponse($response, $sptxInvoice, $actionType);
+			}
     	}
-	
-		//Essential validation!
-		if(!$response->data || !$response->data->result){
-    		Mage::throwException('Invalid tax response');
-    	}
-    	$responseResult = $response->data->result;
-        switch ($responseResult->resultType) {
-            case self::RESPONSE_TYPE_SUCCESS:
-                break;
-            case self::RESPONSE_TYPE_FAILED_WITH_ERRORS:
-            case self::RESPONSE_TYPE_FAILED_INVOICE_NUMBER:
-            default :
-            	Mage::throwException('Tax request failed');
-                break;
-        }
-		
+		$this->_validateResponse($response);
 		return $response;
 	}
 	
@@ -161,6 +144,23 @@ class Harapartners_SpeedTax_Helper_Connector_Speedtax extends Harapartners_Conne
     	$sptxInvoiceCacheKey = $this->_generateInvoiceCacheKey($sptxInvoice);
     	$response = Mage::getSingleton('speedtax/session')->saveCachedResponse($sptxInvoiceCacheKey, $response);
     	return true;
+	}
+	
+	protected function _validateResponse($response){
+		//Essential validation for SpeedTax response data structure
+		if(empty($response->data->result->resultType)){
+    		Mage::throwException('Invalid tax response');
+    	}
+        switch ($response->data->result->resultType) {
+            case self::RESPONSE_TYPE_SUCCESS:
+                break;
+            case self::RESPONSE_TYPE_FAILED_WITH_ERRORS:
+            case self::RESPONSE_TYPE_FAILED_INVOICE_NUMBER:
+            default :
+            	Mage::throwException('Tax request failed');
+                break;
+        }
+        return $this;
 	}
 	
 	protected function _isCacheRequestAllowed($actionType){
