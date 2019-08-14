@@ -57,7 +57,11 @@ class Harapartners_SpeedTax_Model_Observer extends Mage_Core_Model_Abstract {
 				$invoice->setData('speedtax_invoice_status', Harapartners_SpeedTax_Helper_Processor::SPEEDTAX_INVOICE_STATUS_FAILSAFE);
 			}else{
 				$maskedErrorMessage = 'There is an error processing tax information.';
-				Mage::getSingleton('core/session')->addError($maskedErrorMessage);
+				if (Mage::app()->getStore()->isAdmin()) {
+					Mage::getSingleton('adminhtml/session')->addError($maskedErrorMessage);
+				}else{
+					Mage::getSingleton('core/session')->addError($maskedErrorMessage);
+				}
 			}
         }
     }

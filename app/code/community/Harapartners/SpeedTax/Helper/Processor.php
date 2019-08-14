@@ -23,10 +23,12 @@ class Harapartners_SpeedTax_Helper_Processor extends Mage_Core_Helper_Abstract {
     // ========================== Actions ========================== //
  	public function queryQuoteAddress(Mage_Sales_Model_Quote_Address $mageQuoteAddress){
         if (!$this->_isTaxable($mageQuoteAddress)){
+        	$this->_clearQuoteAddressTax($mageQuoteAddress);
             return false;
         }
         $sptxInvoice = Mage::helper('speedtax/connector_data')->prepareSpeedTaxInvoiceByMageQuoteAddress($mageQuoteAddress);
         if(!$sptxInvoice|| !$sptxInvoice->lineItems){
+        	$this->_clearQuoteAddressTax($mageQuoteAddress);
             return false;
         }
 		$responseResult = Mage::helper('speedtax/connector_speedtax')->calculateInvoiceRequest($sptxInvoice);
@@ -38,6 +40,11 @@ class Harapartners_SpeedTax_Helper_Processor extends Mage_Core_Helper_Abstract {
 		if(!!$mageOrderInvoice->getData('speedtax_transaction_id')){
     		Mage::throwException('This invoice was already posted through SalesTax.');
     	}
+    	
+		$customerGroupId = $mageOrderInvoice->getOrder()->getCustomerGroupId();
+        if($this->_isCustomerGroupTaxExempt($customerGroupId)){
+        	return false;
+        }
     	
         $sptxInvoice = Mage::helper('speedtax/connector_data')->prepareSpeedTaxInvoiceByMageOrderInvoice($mageOrderInvoice);
         if(!$sptxInvoice || !$sptxInvoice->lineItems){
@@ -54,6 +61,11 @@ class Harapartners_SpeedTax_Helper_Processor extends Mage_Core_Helper_Abstract {
     	if(!!$mageOrderCreditmemo->getData('speedtax_transaction_id')){
     		Mage::throwException('This credit memo was already posted through SalesTax.');
     	}
+    	
+    	$customerGroupId = $mageOrderCreditmemo->getOrder()->getCustomerGroupId();
+        if($this->_isCustomerGroupTaxExempt($customerGroupId)){
+        	return false;
+        }
     	
         $sptxInvoice = Mage::helper('speedtax/connector_data')->prepareSpeedTaxInvoiceByMageOrderCreditmemo($mageOrderCreditmemo);
         if(!$sptxInvoice || !$sptxInvoice->lineItems){
@@ -110,15 +122,40 @@ class Harapartners_SpeedTax_Helper_Processor extends Mage_Core_Helper_Abstract {
     //Mage_Sales_Model_Quote_Address or Mage_Sales_Model_Order_Address 
     protected function _isTaxable($mageAddress) {
         //$mageAddress can be quote of order address, or null for virtual product
+        //Note: only check shipping to avoid double tax calculation
         if(!($mageAddress instanceof Varien_Object)  
                 || $mageAddress->getAddressType() != Mage_Sales_Model_Quote_Address::TYPE_SHIPPING
         ){
             return false;
         }
+        
+        //Check tax exempt customer group
+        //Only for quote, order/inovice will always reports the amount the tax captured
+        if($mageAddress instanceof Mage_Sales_Model_Quote_Address && !!$mageAddress->getQuote()){
+        	//Note, 0 for guest group
+        	$customerGroupId = $mageAddress->getQuote()->getCustomerGroupId();
+        	if($this->_isCustomerGroupTaxExempt($customerGroupId)){
+        		return false;
+        	}
+        }
+        
         //Nexus test
+        //We need to test for exceptions where billing address is used for calculation
+        //Note this is after the address type test to avoid double tax calculation
+    	$mappedAddress = Mage::helper('speedtax/connector_data')->mapAddressExceptions($mageAddress);
         $originsString = Mage::getStoreConfig('speedtax/speedtax/origins');
-        return in_array($mageAddress->getRegionId(), explode(',', $originsString));
+        if(!in_array($mappedAddress->getRegionId(), explode(',', $originsString))){
+        	return false;
+        }
+        
+        //By default, calculation tax
+        return true;
     }
+    
+	protected function _isCustomerGroupTaxExempt($customerGroupId) {
+        $taxExemptCustomerGroupString = Mage::getStoreConfig('speedtax/speedtax/tax_exempt_customer_group');
+        return in_array($customerGroupId,  explode(',', $taxExemptCustomerGroupString));
+	}
     
 	//Mage_Sales_Model_Quote_Address ONLY
     protected function _applyResponseToQuote($responseResult, Mage_Sales_Model_Quote_Address $mageQuoteAddress){
@@ -135,6 +172,18 @@ class Harapartners_SpeedTax_Helper_Processor extends Mage_Core_Helper_Abstract {
             $mageQuoteAddress->setShippingTaxAmount($taxShippingAmount);
             $mageQuoteAddress->setBaseShippingTaxAmount($taxShippingAmount);
         }
+        return;
+    }
+    
+	protected function _clearQuoteAddressTax(Mage_Sales_Model_Quote_Address $mageQuoteAddress){
+		//Only clear tax related to this quote address
+        foreach ( $mageQuoteAddress->getAllItems() as $mageQuoteItem ) {
+            $mageQuoteItem->setTaxAmount(0.0);
+            $mageQuoteItem->setBaseTaxAmount(0.0);
+            $mageQuoteItem->setTaxPercent(0.0);
+        }
+        $mageQuoteAddress->setShippingTaxAmount(0.0);
+        $mageQuoteAddress->setBaseShippingTaxAmount(0.0);
         return;
     }
     
@@ -170,7 +219,7 @@ class Harapartners_SpeedTax_Helper_Processor extends Mage_Core_Helper_Abstract {
 	protected function _getTaxShippingAmount($responseResult) {
 		if(isset($responseResult->lineItemBundles->lineItems)){
 			foreach($responseResult->lineItemBundles->lineItems as $responseLineItem){
-	       		if($responseLineItem->productCode == Harapartners_SpeedTax_Helper_Connector_Data::TAX_SHIPPING_LINEITEM_TAX_CLASS){
+	       		if($responseLineItem->productCode == Mage::getStoreConfig("speedtax/speedtax/shipping_tax_code")){
 	       			return $responseLineItem->taxAmount->decimalValue;
 	       		}
 	       	}
@@ -188,6 +237,5 @@ class Harapartners_SpeedTax_Helper_Processor extends Mage_Core_Helper_Abstract {
 //        }
 //        return $this;
 //    }
-    
 
 }

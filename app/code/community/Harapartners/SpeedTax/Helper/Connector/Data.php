@@ -11,9 +11,6 @@
  *
  */
 class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstract {
-	
-	const TAX_SHIPPING_LINEITEM_TAX_CLASS 		= 'TAX_SHIPPING';
-    const TAX_SHIPPING_LINEITEM_REFERNCE_NAME 	= 'TAX_SHIPPING';
     
     protected $_productTaxClassNoneTaxableId 	= 0; //Magento default
 //    protected $_allowedCountryIds = array('US', 'CA');
@@ -63,9 +60,10 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
         }
         
         // ----- Other line items ----- //
-        //If global store config specifies: "tax_shipping", then create shipping cost line item. Note this is different from "Tax_Shipping" tax class of a product
+        //If global store config specifies: "is_tax_shipping", then create shipping cost line item.
+		//The tax code of this line item is specified by system config
         $shipingAmount = $mageQuoteAddress->getShippingAmount();
-        if(!!Mage::getStoreConfig("speedtax/speedtax/tax_shipping") && $shipingAmount > 0.0){
+        if(!!Mage::getStoreConfig("speedtax/speedtax/is_tax_shipping") && $shipingAmount > 0.0){
             $shippingLineItem = $this->_generateLineItemFromShippingCost($mageQuoteAddress, $shipingAmount);
             $shippingLineItem->lineItemNumber = count( $sptxInvoice->lineItems );
             $sptxInvoice->lineItems[] = $shippingLineItem;
@@ -114,12 +112,15 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
         }
         
         // ----- Other line items ----- //
-		//If global store config specifies: "tax_shipping", then create shipping cost line item. Note this is different from "Tax_Shipping" tax class of a product
+		//If global store config specifies: "is_tax_shipping", then create shipping cost line item.
+		//The tax code of this line item is specified by system config
 		if($mageOrderInvoice->getShippingAmount() === null){
         	$mageOrderInvoice->collectTotals();
         }
         $shipingAmount = $mageOrderInvoice->getShippingAmount();
-        if(!!Mage::getStoreConfig("speedtax/speedtax/tax_shipping") && $shipingAmount > 0.0){
+        $shipingTaxAmount = $mageOrderInvoice->getShippingTaxAmount();
+        // Must check shipping tax amount is NOT forced to 0 by Magento
+        if(!!Mage::getStoreConfig("speedtax/speedtax/is_tax_shipping") && $shipingAmount > 0.0 && $shipingTaxAmount > 0.0){
             $shippingLineItem = $this->_generateLineItemFromShippingCost($mageOrderAddress, $shipingAmount);
             $shippingLineItem->lineItemNumber = count( $sptxInvoice->lineItems );
             $sptxInvoice->lineItems[] = $shippingLineItem;
@@ -169,12 +170,15 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
         }
         
         // ----- Other line items ----- //
-		//If global store config specifies: "tax_shipping", then create shipping cost line item. Note this is different from "Tax_Shipping" tax class of a product
+		//If global store config specifies: "is_tax_shipping", then create shipping cost line item.
+		//The tax code of this line item is specified by system config
 		if($mageOrderCreditmemo->getShippingAmount() === null){
         	$mageOrderCreditmemo->collectTotals();
         }
         $shipingAmount = $mageOrderCreditmemo->getShippingAmount();
-        if(!!Mage::getStoreConfig("speedtax/speedtax/tax_shipping") && $shipingAmount > 0.0){
+        $shipingTaxAmount = $mageOrderInvoice->getShippingTaxAmount();
+        // Must check shipping tax amount is NOT forced to 0 by Magento
+        if(!!Mage::getStoreConfig("speedtax/speedtax/is_tax_shipping") && $shipingAmount > 0.0 && $shipingTaxAmount > 0.0){
             $shippingLineItem = $this->_generateLineItemFromShippingCost($mageOrderAddress, $shipingAmount);
             $shippingLineItem->lineItemNumber = count( $sptxInvoice->lineItems );
             $sptxInvoice->lineItems[] = $shippingLineItem;
@@ -185,13 +189,44 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
     }
     
     // ========================== Utilities ========================== //
+    public function mapAddressExceptions($sourceAddress){
+    	//By default the we take the source address as the ship to address for tax calculation
+    	$mappedAddress = $sourceAddress;
+    	
+    	//However, we also allow exceptions where billing address is used for calculation, if:
+    	//1) The source address in NOT in the exception list, and
+    	//2) The billing address (of the corresponding order or quote) is in the exception list
+    	$isExceptionEnabled = Mage::getStoreConfig('speedtax/tax_by_billing/is_enabled');
+    	$exceptionOrigin = explode(',', Mage::getStoreConfig('speedtax/tax_by_billing/billing_origins'));
+    	if($isExceptionEnabled && !in_array($sourceAddress->getRegionId(), $exceptionOrigin)){
+    		//Seach for billing address
+    		$billingAddress = null;
+    		if($sourceAddress instanceof Mage_Sales_Model_Quote_Address){
+    			$quote = $sourceAddress->getQuote();
+    			if(!!$quote && !!$quote->getBillingAddress()
+    					&& in_array($quote->getBillingAddress()->getRegionId(), $exceptionOrigin)
+    			){
+    				$mappedAddress = $quote->getBillingAddress();
+    			}
+    		}elseif($sourceAddress instanceof Mage_Sales_Model_Order_Address){
+    			$order = $sourceAddress->getOrder();
+    			if(!!$order && !!$order->getBillingAddress()
+    					&& in_array($order->getBillingAddress()->getRegionId(), $exceptionOrigin)
+    			){
+    				$mappedAddress = $order->getBillingAddress();
+    			}
+    		}
+    	}
+    	return $mappedAddress;
+    }
+    
 	protected function _generateLineItemFromShippingCost($mageAddress, $shipingAmount) {
         $shippingLineItem = new stdClass();
-        $shippingLineItem->productCode = self::TAX_SHIPPING_LINEITEM_TAX_CLASS;
-        $shippingLineItem->customReference = self::TAX_SHIPPING_LINEITEM_REFERNCE_NAME;
+        $shippingLineItem->productCode = Mage::getStoreConfig("speedtax/speedtax/shipping_tax_code");
+        $shippingLineItem->customReference = Mage::getStoreConfig("speedtax/speedtax/shipping_tax_code");
         $shippingLineItem->quantity = 1;
-        $shippingLineItem->shipFromAddress = $this->_getShipFromAddress ();
-        $shippingLineItem->shipToAddress = $this->_getShippingToAddress ($mageAddress); //Note, address type is validated at the entry point 'queryQuoteAddress'
+        $shippingLineItem->shipFromAddress = $this->_getShipFromAddress();
+        $shippingLineItem->shipToAddress = $this->_getShippingToAddress($mageAddress); //Note, address type is validated at the entry point 'queryQuoteAddress'
         
         $shippingPrice = new stdClass();
         $shippingPrice->decimalValue = $shipingAmount;
@@ -204,12 +239,12 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
 	protected function _getShipFromAddress() {
 		if($this->_shipFromAddress === null){
 	        $this->_shipFromAddress = new stdClass();
-	        $countryId = Mage::getStoreConfig ( 'shipping/origin/country_id');
-	        $zip = Mage::getStoreConfig ('shipping/origin/postcode');
-	        $regionId = Mage::getStoreConfig ( 'shipping/origin/region_id');
+	        $countryId = Mage::getStoreConfig('shipping/origin/country_id');
+	        $zip = Mage::getStoreConfig('shipping/origin/postcode');
+	        $regionId = Mage::getStoreConfig('shipping/origin/region_id');
 	        $state = Mage::getModel('directory/region')->load($regionId)->getName();
-	        $city = Mage::getStoreConfig ('shipping/origin/city');
-	        $street = Mage::getStoreConfig ('shipping/origin/street');
+	        $city = Mage::getStoreConfig('shipping/origin/city');
+	        $street = Mage::getStoreConfig('shipping/origin/street');
 	            
 	        $this->_shipFromAddress->address1 = $street;
 	        $this->_shipFromAddress->address2 = $city . ", " . $state . " " . $zip; //. ", " . $countryId;
@@ -218,14 +253,18 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
     }
     
     //Shipping Destination Address
-    protected function _getShippingToAddress($address) {
+    protected function _getShippingToAddress($sourceAddress) {
     	if($this->_shipToAddress === null){
+    		
+    		//We need to test for exceptions where billing address is used for calculation
+    		$mappedAddress = $this->mapAddressExceptions($sourceAddress);
+    		
 			$this->_shipToAddress = new stdClass();
-			$country = $address->getCountry();
-			$zip = $address->getPostcode(); //$zip = preg_replace('/[^0-9\-]*/', '', $address->getPostcode()); //US zip code clean up
-			$state = $address->getRegion(); //No region resolution needed, $this->_getStateCodeByRegionId($address->getState());
-			$city = $address->getCity();
-			$street = implode(' ', $address->getStreet()); //In case of multiple line address
+			$country = $mappedAddress->getCountry();
+			$zip = $mappedAddress->getPostcode(); //$zip = preg_replace('/[^0-9\-]*/', '', $mappedAddress->getPostcode()); //US zip code clean up
+			$state = $mappedAddress->getRegion(); //No region resolution needed, $this->_getStateCodeByRegionId($mappedAddress->getState());
+			$city = $mappedAddress->getCity();
+			$street = implode(' ', $mappedAddress->getStreet()); //In case of multiple line address
 	            
 			$this->_shipToAddress->address1 = $street;
 			$this->_shipToAddress->address2 = $city . ", " . $state . " " . $zip; //. ", " . $county;
@@ -237,15 +276,14 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
     //In a standard setup, tax is calculated by tax class (i.e. product code), if empty use default
     //Advanced calculation by product SKU is also possible. Please contact SpeedTax support to setup advanced service
 	protected function _getProductCode($item){
-        $useTaxCode = Mage::helper('speedtax')->useTaxClass();
-        if(!$useTaxCode){
+        if(!Mage::helper('speedtax')->isUseProductTaxClass()){
             return $item->getSku();
         }
-        if($taxCode = $this->_getTaxClassByItem($item)){
-            return $taxCode;
-        }else{
-            return $item->getSku();
+        $taxCode = $this->_getTaxClassByItem($item);
+        if(!$taxCode){
+            $taxCode = $item->getSku();
         }
+        return $taxCode;
     }
     
     protected function _getTaxClassByItem($item){

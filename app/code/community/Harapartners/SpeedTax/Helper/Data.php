@@ -25,8 +25,8 @@ class Harapartners_SpeedTax_Helper_Data extends Mage_Core_Helper_Abstract {
 		return Mage::getStoreConfig ( $this->_xmlPathPrefix . 'is_enabled' );
 	}
 	
-	public function useTaxClass(){
-	    return Mage::getStoreConfig ( $this->_xmlPathPrefix . 'customized_tax_class' );
+	public function isUseProductTaxClass(){
+	    return Mage::getStoreConfig ( $this->_xmlPathPrefix . 'is_use_product_tax_class' );
 	}
 	
 	public function isAddressValidationOn($address, $storeId) {

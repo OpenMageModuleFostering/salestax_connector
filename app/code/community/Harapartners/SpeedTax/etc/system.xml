@@ -48,9 +48,9 @@
                     <fields>
 						<is_enabled translate="label">
 							<label>Status</label>
-							<comment>If the Status is set to "Disable", default Magento tax calculations will be used.</comment>
+							<comment><![CDATA[If "No", default Magento tax calculations will be used.]]></comment>
 							<frontend_type>select</frontend_type>
-							<source_model>adminhtml/system_config_source_enabledisable</source_model>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
 							<sort_order>100</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
@@ -58,7 +58,7 @@
 						</is_enabled>
                         <username translate="label">
                             <label>Username</label>
-                            <comment>Should have been provided in your sign up email.</comment>
+                            <comment><![CDATA[Please check the credentials in the sign up email.]]></comment>
                             <frontend_type>text</frontend_type>
                             <sort_order>110</sort_order>
                             <show_in_default>1</show_in_default>
@@ -68,7 +68,7 @@
                         </username>
                         <password translate="label">
                             <label>Password</label>
-                            <comment>Should have been provided in your sign up email.</comment>
+                            <comment><![CDATA[Please check the credentials in the sign up email.]]></comment>
                             <frontend_type>obscure</frontend_type>
                             <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>115</sort_order>
@@ -79,7 +79,7 @@
                         </password>
                         <company_code translate="label">
                             <label>Company Code</label>
-                            <comment>Should have been provided in your sign up email.</comment>
+                            <comment><![CDATA[Please check the credentials in the sign up email.]]></comment>
                             <frontend_type>text</frontend_type>
                             <sort_order>120</sort_order>
                             <show_in_default>1</show_in_default>
@@ -89,7 +89,10 @@
                         </company_code>
                         <is_test_mode translate="label">
                             <label>Test Mode</label>
-                            <comment><![CDATA[Switching between test and production accounts.<br/> Please make sure to select the correct account with your credentials.]]></comment>
+                            <comment><![CDATA[
+									Switching between test and production accounts.<br/>
+									Please make sure to select the correct account with your credentials.]]>
+							</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>125</sort_order>
@@ -99,7 +102,9 @@
                         </is_test_mode>
 						<authentication_wizard translate="button_label">
                             <label></label>
-							<comment><![CDATA[Please <b style="color: red;">save</b> the configuration after validating your login credentials.]]></comment>
+							<comment><![CDATA[
+									Please <b style="color: red;">save</b> the configuration after validating your login credentials.
+							]]></comment>
                             <button_label>Validate login credentials</button_label>
                             <frontend_model>speedtax/adminhtml_system_config_form_field_authentication</frontend_model>
                             <sort_order>150</sort_order>
@@ -107,19 +112,46 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </authentication_wizard>
-                        <tax_shipping translate="label">
-                            <label>Calculate Taxes On Shipping</label>
-                            <comment>This will send a line item for SHIPPING to be taxed.</comment>
+                        <is_tax_shipping translate="label">
+                            <label>Calculate Taxes On Shipping/Handling Cost</label>
+                            <comment><![CDATA[
+									If "Yes", a separate shipping line item will be used to calculate the shipping tax.<br/>
+									The tax code of this line item can be specified below.
+							]]></comment>
                             <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_enabledisable</source_model>
-                            <sort_order>311</sort_order>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>300</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </tax_shipping>
+                        </is_tax_shipping>
+						<shipping_tax_code translate="label">
+                            <label>Shipping Tax Code</label>
+                            <comment><![CDATA[Default value: "Shipping"]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>310</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </shipping_tax_code>
+						<is_use_product_tax_class translate="label">
+                            <label>Use Product Tax Class as Tax Code</label>
+                            <comment><![CDATA[
+									Default value: "No", where SKU will be used for product tax code.<br/>
+									If "Yes", product tax class name will be used instead.
+							]]></comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>320</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </is_use_product_tax_class>
                         <origins translate="label">
                             <label>Nexus</label>
-                            <comment><![CDATA[Multiple-select. Select <b style="color: red;">all states</b> where you have nexus and want sales taxes to be used for.]]></comment>
+                            <comment><![CDATA[
+									Multi-select. Select <b style="color: red;">all states</b> where you have nexus and want sales taxes to be used for.
+							]]></comment>
                             <frontend_type>multiselect</frontend_type>
                             <sort_order>350</sort_order>
                             <source_model>speedtax/source_usregions</source_model>
@@ -128,8 +160,21 @@
                             <show_in_store>0</show_in_store>
                             <validate>required-entry</validate>
                         </origins>
+						<tax_exempt_customer_group translate="label">
+                            <label>Tax Exempt Customer Group</label>
+							<comment><![CDATA[
+									Multi-select.
+							]]></comment>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>adminhtml/system_config_source_customer_group</source_model>
+                            <sort_order>400</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+							<can_be_empty>1</can_be_empty>
+                        </tax_exempt_customer_group>
 						<is_debug_transaction translate="label">
-                            <label>Debug transactions</label>
+                            <label>Debug Transactions</label>
                             <comment><![CDATA[If "Yes", transactions will be logged.]]></comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
@@ -140,6 +185,42 @@
                         </is_debug_transaction>
                     </fields>
                 </speedtax>
+				<tax_by_billing>
+                    <label>Tax By Billing Address Exceptions</label>
+                    <sort_order>200</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+					<comment><![CDATA[
+                        <p class="switcher">
+						Exceptions can be created to allow tax calculated by billing address (instead of by shipping address), if:<br/>
+						1) The order is billed from a state listed in the "Billing Orgin States" section; and<br/>
+						2) The order is <b>NOT</b> shipped to any state listed in the "Billing Orgin States" section.
+						</p>
+                    ]]></comment>
+                    <fields>
+						<is_enabled translate="label">
+							<label>Is Enabled</label>
+							<comment><![CDATA[]]></comment>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>100</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</is_enabled>
+                        <billing_origins translate="label">
+                            <label>Billing Orgin States</label>
+                            <comment><![CDATA[Multiple-select. Please make sure the selected state(s) is in the list of your nexus.]]></comment>
+                            <frontend_type>multiselect</frontend_type>
+                            <sort_order>200</sort_order>
+                            <source_model>speedtax/source_usregions</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </billing_origins>
+                    </fields>
+                </tax_by_billing>
 				<failsafe>
 					<label>Fail Safe Configuration</label>
                     <comment><![CDATA[

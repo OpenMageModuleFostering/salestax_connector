@@ -18,7 +18,7 @@ class Harapartners_SpeedTax_Model_Failsafe_Sales_Total_Quote_Tax extends Mage_Ta
     }
     
 	protected function _calculateShippingTax(Mage_Sales_Model_Quote_Address $address, $taxRateRequest){
-        if(!Mage::getStoreConfig("speedtax/speedtax/tax_shipping")){
+        if(!Mage::getStoreConfig("speedtax/speedtax/is_tax_shipping")){
         	return $this;
         }
         return parent::_calculateShippingTax($address, $taxRateRequest);

@@ -15,7 +15,7 @@
 <config>
     <modules>
         <Harapartners_SpeedTax>
-            <version>4.1.0</version>
+            <version>4.1.1</version>
         </Harapartners_SpeedTax>
     </modules>
     <global>
@@ -146,6 +146,9 @@
         <speedtax>
             <speedtax>
                 <action>0</action>
+				<is_tax_shipping>0</is_tax_shipping>
+				<shipping_tax_code>Shipping</shipping_tax_code>
+				<is_use_product_tax_class>0</is_use_product_tax_class>
                 <url>https://www.speedtax.com/</url>
                 <shipping_sku>Shipping</shipping_sku>
                 <adjustment_positive_sku>Adjustment</adjustment_positive_sku>
