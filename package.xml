@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+    <name>SalesTax_Connector</name>
+    <version>3.1.7</version>
+    <stability>stable</stability>
+    <license uri="http://www.harapartners.com/terms/eula">Hara Partners End User License Agreement</license>
+    <channel>community</channel>
+    <extends/>
+    <summary>Simplify sales and use tax calculation, compliance, and management in the cloud! </summary>
+    <description>Simplify sales and use tax calculation, compliance, and management in the cloud! </description>
+    <notes>Simplify sales and use tax calculation, compliance, and management in the cloud! </notes>
+    <authors><author><name>Ken Nunes</name><user>kennuneswo</user><email>ken.nunes@wolterskluwer.com</email></author></authors>
+    <date>2014-02-18</date>
+    <time>00:24:52</time>
+    <contents><target name="magecommunity"><dir name="Harapartners"><dir name="SpeedTax"><dir name="Block"><dir name="Adminhtml"><dir name="System"><dir name="Config"><dir name="Form"><dir name="Field"><file name="Authentication.php" hash="8be5a91c0aa3d23ced5a2852b940dac3"/></dir></dir></dir></dir></dir></dir><dir name="Helper"><dir name="Connector"><file name="Data.php" hash="4ae2eb94b6cf797eef7e2a7a8249e073"/><file name="Speedtax.php" hash="b81e16f25f4f51a6544c44301ec00667"/></dir><file name="Data.php" hash="4a3805bc334300c5b79afa89a3330be6"/><file name="Processor.php" hash="600241518208610cc76ffd6051d1cb6a"/></dir><dir name="Model"><file name="Observer.php" hash="609d1237bc2eddedeb629ed322540fc8"/><dir name="Rewrite"><dir name="Tax"><dir name="Sales"><dir name="Total"><dir name="Quote"><file name="Tax.php" hash="00a4b49781a30b5b19ea82b083dcd2df"/></dir></dir></dir></dir></dir><file name="Session.php" hash="46175fe01434d91757499d5c0f7f2bee"/><dir name="Source"><file name="Usregions.php" hash="2ab7713b5b46f142e133459952cd1ef5"/></dir></dir><dir name="controllers"><dir name="Adminhtml"><dir name="System"><dir name="Config"><file name="AjaxController.php" hash="fbb6a35c7f2c0706f39160413ced8b2f"/></dir></dir></dir></dir><dir name="etc"><file name="config.xml" hash="5021e1fc50747a23d68b9d0e00721e85"/><file name="system.xml" hash="945c43e0653cbdb934578cae6039a830"/></dir><dir name="sql"><dir name="speedtax_setup"><file name="mysql4-upgrade-3.0.9-3.1.0.php" hash="886b0ebdd5b0234b89fcff5fc07fbfd1"/></dir></dir></dir><dir name="ConnectorHub"><dir name="Block"><dir name="Adminhtml"><dir name="System"><dir name="Config"><dir name="Form"><dir name="Field"><file name="Json.php" hash="9dfc33f951be4c545c757e7d9724eb8c"/></dir></dir></dir></dir></dir></dir><dir name="Helper"><dir name="Connector"><file name="Config.php" hash="ded948bc18c602d6fc9c148cd826245a"/><file name="Core.php" hash="503eddf9049c7f7fc0b0494a51d21b5d"/></dir><file name="Mcrypt.php" hash="928572b4884d60f03ecde04b63186ea2"/><file name="Object.php" hash="487cd77c21c8bb9dec6189cc19d8c6a5"/></dir><dir name="Model"><file name="Observer.php" hash="d6d7f852fbde7e14e6fdd5f7c75e77cd"/><dir name="Rewrite"><dir name="Paypal"><dir name="Api"><file name="Nvp.php" hash="e260f23f4093e7932286f81bf48f855a"/></dir><file name="Config.php" hash="41db0559b01ef40fa3a33e85a416d016"/></dir></dir></dir><dir name="etc"><file name="config.xml" hash="4e0fc6a2496f4f7b871b8e389ff11b39"/></dir></dir></dir></target><target name="mageetc"><dir name="modules"><file name="Harapartners_SpeedTax.xml" hash="eb9e312adde3ebeecbceb8f8c4045862"/><file name="Harapartners_ConnectorHub.xml" hash="77e80f0f2d28c0ff45b869d467b49bbf"/></dir></target></contents>
+    <compatible/>
+    <dependencies><required><php><min>5.1.0</min><max>6.0.0</max></php></required></dependencies>
+</package>

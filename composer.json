@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/SalesTax_Connector",
+    "type": "magento-module",
+    "license": "Hara-Partners-End-User-License-Agreement",
+    "homepage": "",
+    "description": "Simplify sales and use tax calculation, compliance, and management in the cloud! ",
+    "authors": [
+    {
+        "name": "Ken Nunes",
+        "email": "ken.nunes@wolterskluwer.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

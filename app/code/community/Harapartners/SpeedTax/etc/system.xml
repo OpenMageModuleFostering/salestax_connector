@@ -1,0 +1,167 @@
+<?xml version="1.0"?>
+<!--
+/*
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the End User Software Agreement (EULA).
+ * It is also available through the world-wide-web at this URL:
+ * http://www.harapartners.com/license
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to eula@harapartners.com so we can send you a copy immediately.
+ * 
+ */
+ -->
+<config>
+    <sections>
+        <speedtax translate="label" module="speedtax">
+            <class>speedtax-section</class>
+            <label><![CDATA[SalesTax.com by <br/><img src="https://www.harapartners.com/skin/frontend/enterprise/harapartners/images/hp/HP2.0Logo.png" alt="HaraPartners" width="100" height="20">]]></label>
+            <header_css>speedtax-header</header_css>
+            <tab>sales</tab>
+            <sort_order>304</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+				<signup>
+                    <label>Sign up for SalesTax.com</label>
+                    <comment><![CDATA[
+                        <p class="switcher">
+						Sign up for a <a href="http://harapartners.com/solutions/salestax/30daytrial" target="_blank" style="color: #00C3FF;">Free 30 Day Trial</a>.<br/>
+						<a href="http://www.harapartners.com/solutions/salestax/signup" target="_blank" style="color: #00C3FF;">Sign up for SalesTax.com to process your Sales Taxes.</a>.<br/>
+                        Call with questions at <b>646-663-5672</b> or find more information under <a href="http://www.harapartners.com/salestax" target="_blank" style="color: #00C3FF;">http://www.harapartners.com/salestax</a>.
+						</p>
+                    ]]></comment>
+                    <sort_order>0</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+					<expanded>1</expanded>
+				</signup>
+                <speedtax>
+                    <label>SalesTax.com Configuration</label>
+                    <sort_order>0</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+						<is_enabled translate="label">
+							<label>Status</label>
+							<comment>If the Status is set to "Disable", default Magento tax calculations will be used.</comment>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_enabledisable</source_model>
+							<sort_order>100</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</is_enabled>
+                        <username translate="label">
+                            <label>Username</label>
+                            <comment>Should have been provided in your sign up email.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>110</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+							<validate>required-entry</validate>
+                        </username>
+                        <password translate="label">
+                            <label>Password</label>
+                            <comment>Should have been provided in your sign up email.</comment>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
+                            <sort_order>115</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+							<validate>required-entry</validate>
+                        </password>
+                        <company_code translate="label">
+                            <label>Company Code</label>
+                            <comment>Should have been provided in your sign up email.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>120</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+							<validate>required-entry</validate>
+                        </company_code>
+                        <is_test_mode translate="label">
+                            <label>Test Mode</label>
+                            <comment><![CDATA[Switching between test and production accounts.<br/> Please make sure to select the correct account with your credentials.]]></comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>125</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </is_test_mode>
+						<authentication_wizard translate="button_label">
+                            <label></label>
+							<comment><![CDATA[You <b style="color: red;">must</b> validate your login credentials first and then <b style="color: red;">save</b> the configuration.]]></comment>
+                            <button_label>Validate login credentials</button_label>
+                            <frontend_model>speedtax/adminhtml_system_config_form_field_authentication</frontend_model>
+                            <sort_order>150</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </authentication_wizard>
+                        <tax_shipping translate="label">
+                            <label>Calculate Taxes On Shipping</label>
+                            <comment>This will send a line item for SHIPPING to be taxed.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_enabledisable</source_model>
+                            <sort_order>311</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </tax_shipping>
+                        <origins translate="label">
+                            <label>Nexus</label>
+                            <comment><![CDATA[Multiple-select. Select <b style="color: red;">all states</b> where you have nexus and want sales taxes to be used for.]]></comment>
+                            <frontend_type>multiselect</frontend_type>
+                            <sort_order>350</sort_order>
+                            <source_model>speedtax/source_usregions</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>required-entry</validate>
+                        </origins>
+                    </fields>
+                </speedtax>
+				<help_extra>
+					<label>SalesTax.com Help</label>
+                    <comment><![CDATA[
+                        <p class="switcher">
+						Get help with configuring and setting up the SalesTax.com module at <a href="http://www.harapartners.com/salestax/help#configuration" target="_blank" style="color: #00C3FF;">http://www.harapartners.com/salestax/help#configuration</a>.<br/>
+						Find more information at <a href="http://www.harapartners.com/salestax/help" target="_blank" style="color: #00C3FF;">http://www.harapartners.com/salestax/help</a>.<br/>
+                        Learn more about the SalesTax.com solution, additional features, updates and help at <a href="http://www.harapartners.com/salestax" target="_blank" style="color: #00C3FF;">http://www.harapartners.com/salestax</a>.
+						</p>
+                    ]]></comment>
+                    <sort_order>100</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+					<expanded>1</expanded>
+				</help_extra>
+            </groups>
+        </speedtax>
+        <shipping>
+            <groups>
+                <origin>
+                    <fields>
+                        <street translate="label">
+                            <label><![CDATA[Number & Street]]></label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>99</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </street>
+                    </fields>
+                </origin>
+            </groups>
+        </shipping>
+    </sections>
+</config>

@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<!--
+/*
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the End User Software Agreement (EULA).
+ * It is also available through the world-wide-web at this URL:
+ * http://www.harapartners.com/license
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to eula@harapartners.com so we can send you a copy immediately.
+ * 
+ */
+ -->
+<config>
+    <modules>
+        <Harapartners_SpeedTax>
+            <version>3.1.6</version>
+        </Harapartners_SpeedTax>
+    </modules>
+    <global>
+        <blocks>
+            <speedtax>
+                <class>Harapartners_SpeedTax_Block</class>
+            </speedtax>
+        </blocks>
+        <models>
+            <speedtax>
+                <class>Harapartners_SpeedTax_Model</class>
+            </speedtax>
+			<tax>
+                <rewrite>
+                    <sales_total_quote_tax>Harapartners_SpeedTax_Model_Rewrite_Tax_Sales_Total_Quote_Tax</sales_total_quote_tax>
+                </rewrite>
+            </tax>
+        </models>
+        <helpers>
+            <speedtax>
+                <class>Harapartners_SpeedTax_Helper</class>
+            </speedtax>
+        </helpers>
+        <resources>
+            <speedtax_setup>
+                <setup>
+                    <module>Harapartners_SpeedTax</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </speedtax_setup>
+        </resources>
+        <events>
+            <sales_order_invoice_pay>
+                <observers>
+                    <speedtax>
+                        <type>singleton</type>
+                        <class>speedtax/observer</class>
+                        <method>saleOrderInvoicePay</method>
+                    </speedtax>
+                </observers>
+            </sales_order_invoice_pay>
+            <sales_order_creditmemo_refund>
+                <observers>
+                    <speedtax>
+                        <type>singleton</type>
+                        <class>speedtax/observer</class>
+                        <method>salesOrderCreditmemoRefund</method>
+                    </speedtax>
+                </observers>
+            </sales_order_creditmemo_refund>
+			<order_cancel_after>
+				<observers>
+                    <speedtax>
+                        <type>singleton</type>
+                        <class>speedtax/observer</class>
+                        <method>orderCancelAfter</method>
+                    </speedtax>
+                </observers>
+			</order_cancel_after>
+        </events>
+    </global>
+    <adminhtml>
+        <acl>
+            <resources>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <speedtax translate="title" module="speedtax">
+                                            <title>SpeedTax Configuration</title>
+                                        </speedtax>
+                                    </children>
+                                </config>
+                            </children>
+                        </system>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+    </adminhtml>
+    <admin>
+        <routers>
+            <speedtax_adminhtml>
+                <use>admin</use>
+                <args>
+                    <module>Harapartners_SpeedTax_Adminhtml</module>
+                    <frontName>speedtax_adminhtml</frontName>
+                </args>
+            </speedtax_adminhtml>
+        </routers>
+    </admin>
+    <default>
+        <speedtax>
+            <speedtax>
+                <action>0</action>
+                <url>https://www.speedtax.com/</url>
+                <shipping_sku>Shipping</shipping_sku>
+                <adjustment_positive_sku>Adjustment</adjustment_positive_sku>
+                <adjustment_negative_sku>Adjustment</adjustment_negative_sku>
+                <sales_person_code>Magento</sales_person_code>
+                <error_full_stop>1</error_full_stop>
+                <error_frontend_action>2</error_frontend_action>
+                <error_frontend_message>Unfortunately, we could not calculate tax for your order. Please try again with a different address or contact us to complete your order.</error_frontend_message>
+                <error_backend_message>There was an error getting tax rates from Speedtax. Please see the error log for details.</error_backend_message>
+                <error_notification_toolbar>1</error_notification_toolbar>
+                <onepage_normalize_message>Your shipping address has been modified during our validation process.  Please confirm the address to the right is accurate.</onepage_normalize_message>
+            </speedtax>
+        </speedtax>
+    </default>
+</config>
