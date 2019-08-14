@@ -20,6 +20,7 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
 	
 	// ========================== Main entry points ========================== //
 	public function prepareSpeedTaxInvoiceByMageQuoteAddress(Mage_Sales_Model_Quote_Address $mageQuoteAddress) {
+		$this->_resetAllAddresses(); // Avoid potential cache contamination
 		$sptxInvoice = new stdClass();
 		$sptxInvoice->lineItems = array();
         $sptxInvoice->customerIdentifier = Mage::getStoreConfig ( 'speedtax/speedtax/username' );
@@ -76,6 +77,7 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
 	public function prepareSpeedTaxInvoiceByMageOrderInvoice(Mage_Sales_Model_Order_Invoice $mageOrderInvoice) {
         //Clear the invoice number so that the request is just a query
         $mageOrderAddress = $mageOrderInvoice->getShippingAddress();
+        $this->_resetAllAddresses(); // Avoid potential cache contamination
         $sptxInvoice = new stdClass();
         $sptxInvoice->lineItems = array();
         //Important to keep unique, invoice should already be attached to the order, count starts from 1
@@ -133,6 +135,7 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
 	public function prepareSpeedTaxInvoiceByMageOrderCreditmemo(Mage_Sales_Model_Order_Creditmemo $mageOrderCreditmemo) {
         //Clear the invoice number so that the request is just a query
         $mageOrderAddress = $mageOrderCreditmemo->getShippingAddress();
+        $this->_resetAllAddresses(); // Avoid potential cache contamination
         $sptxInvoice = new stdClass();
         $sptxInvoice->lineItems = array();
         
@@ -272,6 +275,11 @@ class Harapartners_SpeedTax_Helper_Connector_Data extends Mage_Core_Helper_Abstr
         return $this->_shipToAddress;
     }
     
+    protected function _resetAllAddresses(){
+    	// Avoid potential cache contamination
+    	$this->_shipFromAddress = null;
+    	$this->_shipToAddress = null;
+    }
     
     //In a standard setup, tax is calculated by tax class (i.e. product code), if empty use default
     //Advanced calculation by product SKU is also possible. Please contact SpeedTax support to setup advanced service

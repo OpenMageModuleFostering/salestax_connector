@@ -37,6 +37,7 @@ abstract class Harapartners_ConnectorHub_Helper_Connector_Core {
 			curl_setopt($requestCh, CURLOPT_URL, $requestUrl);
 			curl_setopt($requestCh, CURLOPT_POST, 1);
 			curl_setopt($requestCh, CURLOPT_POSTFIELDS, $requestPostData);
+			curl_setopt($requestCh, CURLOPT_SSL_VERIFYHOST, $this->_getCurlSslVerifyHost());
 			curl_setopt($requestCh, CURLOPT_SSL_VERIFYPEER, $this->_getCurlSslVerifyPeer());
 			curl_setopt($requestCh, CURLOPT_RETURNTRANSFER, 1);
 			curl_setopt($requestCh, CURLOPT_TIMEOUT, self::DEFAULT_CURLOPT_TIMEOUT);
@@ -224,7 +225,20 @@ abstract class Harapartners_ConnectorHub_Helper_Connector_Core {
 		return json_decode($decData);
     }
 
+	protected function _getCurlSslVerifyHost(){
+    	// Global override
+    	if(!!Mage::getStoreConfig('connectorhub/general/disable_verify_host')){
+    		return 0;
+    	}
+    	return 2;
+    }
+    
     protected function _getCurlSslVerifyPeer(){
+    	// Global override
+    	if(!!Mage::getStoreConfig('connectorhub/general/disable_verify_peer')){
+    		return 0;
+    	}
+    	
     	$sslVerifyPeer = 0;
     	try{
     		$secureUrlScheme = parse_url(Mage::getUrl('', array('_secure'=>true)), PHP_URL_SCHEME);

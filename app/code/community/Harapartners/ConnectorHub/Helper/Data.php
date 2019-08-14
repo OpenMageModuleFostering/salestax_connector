@@ -10,16 +10,6 @@
  * to eula@harapartners.com so we can send you a copy immediately.
  *
  */
-class Harapartners_ConnectorHub_Helper_Connector_Config
+class Harapartners_ConnectorHub_Helper_Data extends Mage_Core_Helper_Abstract
 {
-
-    public function getConnectorHubRootUrl()
-    {
-    	$rootUrl = Mage::getStoreConfig('connectorhub/general/service_root_url');
-    	if(!$rootUrl){
-    		$rootUrl = "https://api.connectorsuite.com/";
-    	}
-        return $rootUrl;
-    }
-    
 }

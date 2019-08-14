@@ -58,12 +58,15 @@
 	</adminhtml>
     <default>
         <connectorhub>
-            <global_config>
-                <service_base_url>https://connectorhub.harapartners.com/</service_base_url>
-            </global_config>
+            <general>
+                <service_root_url>https://api.connectorsuite.com/</service_root_url>
+				<!-- /* Compatibility for Staging/Dev server SSL verification */ -->
+				<disable_verify_host>0</disable_verify_host>
+				<disable_verify_peer>0</disable_verify_peer>
+            </general>
         </connectorhub>
         <paypal>
-			<!-- /* Compatibility for Staging server SSL verification */ -->
+			<!-- /* Compatibility for Staging/Dev server SSL verification */ -->
             <wpp>
 				<button_source_ec>Hara_SI_MagentoCE_PPA</button_source_ec>
 				<button_source_dp>Hara_SI_MagentoCE_PPA</button_source_dp>
